@@ -11,6 +11,7 @@
   "dependencies": {
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "@repo/ui": "*",
     "next": "15.5.0"
   },
   "devDependencies": {
@@ -19,6 +20,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@tailwindcss/postcss": "^4",
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
     "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.0",
