@@ -1,0 +1,9 @@
+
+[2K[1G[1myarn run v1.22.22[22m
+[2K[1G[2m$ yarn build:styles && yarn build:components[22m
+[2K[1G[2m$ tailwindcss -i ./src/styles.css -o ./dist/index.css[22m
+[3m[1m[34m≈[39m[22m[23m tailwindcss [34mv4.1.13[39m
+
+Done in [32m15ms[39m
+[2K[1G[2m$ tsc[22m
+[2K[1G✨  Done in 1.20s.
