@@ -1,8 +1,9 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { Size } from './size'
-import { Variant } from './variant'
+import { getSizeStyles, Size } from './size'
+import { getVariantStyles, Variant } from './variant'
+import { getCommonStyles } from './tokens'
 
 interface ButtonProps {
   children: ReactNode
@@ -21,32 +22,9 @@ export const Button = ({
   size = Size.MEDIUM,
   variant = Variant.PRIMARY,
 }: ButtonProps) => {
-  let sizeCssClasses = ''
-  switch (size) {
-    case Size.SMALL:
-      sizeCssClasses = 'px-4 py-2'
-      break
-    case Size.MEDIUM:
-      sizeCssClasses = 'px-8 py-4'
-      break
-    case Size.LARGE:
-      sizeCssClasses = 'px-12 py-6'
-      break
-  }
-  let variantCssClasses = ''
-  switch (variant) {
-    case Variant.PRIMARY:
-      variantCssClasses = 'bg-rose-400'
-      break
-    case Variant.SECONDARY:
-      variantCssClasses = 'bg-violet-400'
-      break
-    case Variant.TERTIARY:
-      variantCssClasses = 'bg-cyan-400'
-      break
-  }
-  const commonCssClasses = 'text-white'
-
+  const sizeCssClasses = getSizeStyles(size)
+  const variantCssClasses = getVariantStyles(variant)
+  const commonCssClasses = getCommonStyles
   const completedCssClasses = `${sizeCssClasses} ${variantCssClasses} ${commonCssClasses} ${className}`
   return href ? (
     <a href={href} className={completedCssClasses}>
