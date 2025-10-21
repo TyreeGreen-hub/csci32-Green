@@ -33,4 +33,15 @@ export class UserResolver {
     const { user, token } = await userService.createUser(input)
     return { user, token }
   }
+  @Mutation(() => AuthPayload)
+  async signIn(
+    @Arg('input', () => SignInInput) input: SignInInput,
+    @Ctx() { userService }: Context,
+  ): Promise<AuthPayload> {
+    if (!input.email || !input.password) {
+      throw new Error('email and password are required')
+    }
+    const { user, token } = await userService.authenticateUser(input)
+    return { user, token }
+  }
 }
