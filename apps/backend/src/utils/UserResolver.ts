@@ -16,33 +16,17 @@ class User {
   @Field(() => String, { nullable: true })
   email?: string
 
-    // Internal field used by the resolver (not exposed to clients)
+  // Internal field used by the resolver (not exposed to clients)
   role_id?: string
 }
 
-@Resolver()
+@Resolver(() => User)
 export class UserResolver {
   @Authorized(PermissionName.UserRead)
   @Query(() => [User])
   findManyUsers(@Ctx() { userService }: Context) {
     return userService.findMany()
   }
-
-  @Resolver(() => User)
-export class UserResolver {
-  // ... your existing queries and mutations above ...
-
-  @FieldResolver(() => Role, { nullable: true })
-  async role(@Root() user: User, @Ctx() ctx: Context) {
-    if (!user.role_id) {
-      return null
-    }
-
-    return ctx.prisma.role.findUnique({
-      where: { role_id: user.role_id },
-    })
-  }
-}
 
   @Mutation(() => AuthPayload)
   async signUp(@Arg('input', () => SignUpInput) input: SignUpInput, @Ctx() { userService }: Context) {
