@@ -1,17 +1,28 @@
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import type { Context } from '@/utils/graphql'
 import { CreatePostInput } from '@/resolvers/types/CreatePostInput'
-import { getDecodedToken } from '@/utils/authHelpers'
-// import { Authorized } from 'type-graphql'
-// import { PermissionName } from 'csci32-database'
+import { ListPostsInput, PostSortField, SortDirection } from '@/resolvers/types/ListPostsInput'
+import { Post } from '@/resolvers/types/Post' // adjust path to your type
 
 @Resolver()
 export class PostResolver {
-  // @Authorized([PermissionName.PostCreate])
-  @Mutation(() => String)
-  async createPost(@Ctx() ctx: Context, @Arg('input') input: CreatePostInput): Promise<string> {
-    const authorUserId = getDecodedToken(ctx).sub
-    const post = await ctx.postService.createForAuthor(input, authorUserId)
-    return post.id
+  // NEW: public find one by id
+  @Query(() => Post, { nullable: true })
+  async findPostById(@Ctx() ctx: Context, @Arg('id') id: string): Promise<Post | null> {
+    return await ctx.postService.findOneById(id)
+  }
+
+  @Query(() => [Post])
+  async findManyPosts(
+    @Ctx() ctx: Context,
+    @Arg('input', () => ListPostsInput, { nullable: true }) input?: ListPostsInput,
+  ): Promise<Post[]> {
+    return ctx.postService.findMany({
+      search: input?.search,
+      skip: input?.skip,
+      take: input?.take,
+      sortField: input?.sortField ?? PostSortField.CreatedAt,
+      sortDirection: input?.sortDirection ?? SortDirection.Desc,
+    })
   }
 }
