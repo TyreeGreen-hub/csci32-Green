@@ -1,45 +1,32 @@
 import { UserResolver } from '@/resolvers/UserResolver'
-import { RoleResolver } from '@/resolvers/RoleResolver'
-import { buildSchema, registerEnumType } from 'type-graphql'
-import { customAuthChecker } from '@/utils/authChecker'
-import { PermissionName, RoleName } from 'csci32-database'
+import { PostResolver } from '@/resolvers/PostResolver' // NEW
+import { buildSchema } from 'type-graphql'
 import type { NonEmptyArray } from 'type-graphql'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { PrismaClient } from 'csci32-database'
 import { getBooleanEnvVar, getRequiredStringEnvVar } from '@/utils'
 import type { UserService } from '@/services/UserService'
+import type { PostService } from '@/services/PostService' // NEW
 import mercurius from 'mercurius'
 import mercuriusLogging from 'mercurius-logging'
 
 const GRAPHQL_API_PATH = '/api/graphql'
 const GRAPHQL_DEPTH_LIMIT = 7
 
-// 1️⃣ Register the enums with TypeGraphQL
-registerEnumType(PermissionName, {
-  name: 'PermissionName',
-  description: 'Enum representing valid permissions for authorization',
-})
-
-registerEnumType(RoleName, {
-  name: 'RoleName',
-  description: 'Enum representing valid roles for users',
-})
-
-const resolvers = [UserResolver, RoleResolver] as NonEmptyArray<Function>
+// Add PostResolver to the list
+const resolvers = [UserResolver, PostResolver] as NonEmptyArray<Function>
 
 export interface Context {
   request: FastifyRequest
   reply: FastifyReply
   userService: UserService
+  postService: PostService // NEW
   prisma: PrismaClient
   log: FastifyBaseLogger
 }
 
 export async function registerGraphQL(fastify: FastifyInstance) {
-  const schema = await buildSchema({
-    resolvers,
-    authChecker: customAuthChecker,
-  })
+  const schema = await buildSchema({ resolvers })
 
   const graphiql = getBooleanEnvVar('ENABLE_GRAPHIQL', false)
   fastify.log.info(`GraphiQL is ${graphiql ? 'enabled' : 'disabled'}`)
@@ -54,6 +41,7 @@ export async function registerGraphQL(fastify: FastifyInstance) {
       request,
       reply,
       userService: fastify.userService,
+      postService: fastify.postService, // NEW
       prisma: fastify.prisma,
       log: fastify.log,
     }),

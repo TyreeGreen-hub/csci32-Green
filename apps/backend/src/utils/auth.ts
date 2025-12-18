@@ -1,36 +1,24 @@
-import fs from 'node:fs'
+import type { Context } from '@/utils/graphql'
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
+import type { JwtPayload as DefaultJwtPayload } from 'jsonwebtoken'
+import type { PermissionName } from 'csci32-database'
+import { getRequiredStringEnvVar } from '@/utils'
 
-function readPrivateKey(): string {
-  const key = process.env.PRIVATE_KEY
-  if (!key) {
-    throw new Error('Missing PRIVATE_KEY in .env')
-  }
-  return key
+interface JwtPayload extends DefaultJwtPayload {
+  sub: string
+  email?: string
+  role?: string
+  permissions?: PermissionName[]
 }
 
-export async function hashPassword(plain: string): Promise<string> {
-  const rounds = Number(process.env.BCRYPT_ROUNDS ?? 12)
-  return bcrypt.hash(plain, rounds)
-}
+export function getDecodedToken(ctx: Context): string {
+  const authHeader = ctx.request?.headers?.authorization as string | undefined
+  if (!authHeader) throw new Error('Unauthorized')
 
-export function signToken(claims: Record<string, any>): string {
-  const privateKey = readPrivateKey()
-  const alg = process.env.ALGORITHM ?? 'ES256'
-  const exp = process.env.EXPIRATION ?? '3600'
-  const aud = process.env.AUD ?? 'csci32-frontend'
-  const iss = process.env.ISS ?? 'csci32-backend'
+  const token = authHeader.replace('Bearer ', '')
+  const decoded = jwt.verify(token, getRequiredStringEnvVar('PRIVATE_KEY'), {
+    algorithms: [(process.env.ALGORITHM ?? 'ES256') as jwt.Algorithm],
+  })
 
-  return jwt.sign(claims, privateKey, {
-    algorithm: alg as jwt.Algorithm,
-    expiresIn: exp,
-    audience: aud,
-    issuer: iss,
-    header: { typ: 'JWT' },
-  } as jwt.SignOptions)
-}
-
-export async function comparePassword(plain: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(plain, hash)
+  return decoded as JwtPayload
 }
